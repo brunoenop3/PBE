@@ -2,12 +2,10 @@ require 'mfrc522'
 
 mfrc = MFRC522.new
 
-loop do
-  if mfrc.picc_request(MFRC522::PICC_REQIDL)
+  if mfrc.picc_request(MFRC522::PICC_REQA)
     uid = mfrc.picc_select
+    cleanUid= uid[0]
     if uid
-      puts "Tarjeta detectada: " + uid.map { |byte| byte.to_s(16).rjust(2, '0') }.join(':')
+      puts "Tarjeta detectada: " + cleanUid.map { |b| "%02X" % b}.join(':')
     end
-  end
-  sleep 1  # Espera un poco antes de volver a checar
 end
