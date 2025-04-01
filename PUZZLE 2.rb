@@ -2,13 +2,19 @@
 # encoding: UTF-8
 
 require 'gtk3'
-require_relative 'puzzle1'  # Asegúrate de que puzzle1.rb esté en la misma carpeta
+require_relative 'PUZZLE 1'  # Ajusta el nombre/ubicación según corresponda
+require 'thread'
 
-class MainWindow < Gtk::Window
-  def initialize
-    super("Ejemplo RFID con Ruby-GTK")
-    set_default_size(400, 250)
-    set_border_width(10)
+class MainWindow < Gtk::ApplicationWindow
+  def initialize(application)
+    # Llamamos al constructor de Gtk::ApplicationWindow, pasándole la app
+    super(application)
+
+    # Ajustes de la ventana
+    self.title = "Ejemplo RFID con Ruby-GTK (Application)"
+    self.default_width = 400
+    self.default_height = 250
+    self.border_width = 10
 
     # Caja vertical principal
     vbox = Gtk::Box.new(:vertical, 5)
@@ -56,6 +62,7 @@ class MainWindow < Gtk::Window
     hbox.pack_start(button_clear,   expand: true, fill: true, padding: 5)
     vbox.pack_start(hbox, expand: false, fill: false, padding: 5)
 
+    # Mostramos todos los widgets
     show_all
 
     # Iniciamos el hilo que lee la tarjeta RFID
@@ -66,8 +73,7 @@ class MainWindow < Gtk::Window
   # Hilo para ejecutar el método bloqueante "esperar_tarjeta"
   #
   def iniciar_hilo_lector
-    # Instanciamos nuestro lector (definido en puzzle1.rb)
-    @lector = LectorRFID.new
+    @lector = LectorRFID.new  # Clase definida en 'PUZZLE 1'
 
     Thread.new do
       loop do
@@ -85,8 +91,18 @@ class MainWindow < Gtk::Window
   end
 end
 
-# Lanzamos la aplicación
-Gtk.init
-window = MainWindow.new
-window.signal_connect("destroy") { Gtk.main_quit }
-Gtk.main
+# ------------------------------------------------------------------------------
+# APLICACIÓN
+# ------------------------------------------------------------------------------
+# En lugar de Gtk.init / Gtk.main, creamos una Gtk::Application.
+
+app = Gtk::Application.new("org.ruby.rfid", :flags_none)
+
+# Cuando la aplicación se "active", creamos y mostramos la ventana
+app.signal_connect("activate") do |application|
+  window = MainWindow.new(application)
+  window.present
+end
+
+# Ejecutamos la aplicación
+app.run([$0] + ARGV)
